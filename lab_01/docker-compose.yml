@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  postgresql-db:
+    image: postgres:alpine
+    volumes:
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./postgresql_data:/var/lib/postgresql/data
+    environment:
+      TZ: "Europe/Moscow"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: hotdog123
+      POSTGRES_DB: tmp
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - 8001:5432
+    restart: unless-stopped
