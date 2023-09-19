@@ -6,18 +6,17 @@ TODO:
 [x] constraints in another file
 */
 
-CREATE SCHEMA user;
-CREATE SCHEMA file;
-
 /* Parent 1 */
-CREATE TABLE IF NOT EXISTS file.main (
+DROP TABLE IF EXISTS file;
+CREATE TABLE IF NOT EXISTS file (
     id       UUID,
     filetype VARCHAR(8),
-    fileurl  VARCHAR(256),
+    fileurl  VARCHAR(256)
     );
 
 /* Parent 2 */
-CREATE TABLE IF NOT EXISTS user.main (
+DROP TABLE IF EXISTS user_main;
+CREATE TABLE IF NOT EXISTS user_main (
     id            UUID,
     username      VARCHAR(32),
     fullname      VARCHAR(256),
@@ -29,34 +28,38 @@ CREATE TABLE IF NOT EXISTS user.main (
     birthday      DATE,
     creation_date TIMESTAMP,
     pfp_id        UUID,
-    bio           VARCHAR(256),
+    bio           VARCHAR(256)
     );
 
 /* Parent 3, Child 1 */
-CREATE TABLE IF NOT EXISTS user.post (
+DROP TABLE IF EXISTS user_post;
+CREATE TABLE IF NOT EXISTS user_post (
     id            UUID,
     user_id       UUID,
     text          VARCHAR(1024),
-    creation_date TIMESTAMP,
+    creation_date TIMESTAMP
     );
 
 /* Child 2 */
-CREATE TABLE IF NOT EXISTS user.post_attachment (
+DROP TABLE IF EXISTS user_post_attachment;
+CREATE TABLE IF NOT EXISTS user_post_attachment (
     post_id UUID,
-    file_id UUID,
+    file_id UUID
     );
 
 /* Child 3 */
-CREATE TABLE IF NOT EXISTS user.post_comment (
+DROP TABLE IF EXISTS user_post_comment;
+CREATE TABLE IF NOT EXISTS user_post_comment (
     id            UUID,
     commenter_id  UUID,
     post_id       UUID,
     text          VARCHAR(1024),
-    creation_date TIMESTAMP,
+    creation_date TIMESTAMP
     );
 
 /* Child 4, Many to many */
-CREATE TABLE IF NOT EXISTS user.subscription (
+DROP TABLE IF EXISTS user_subscription;
+CREATE TABLE IF NOT EXISTS user_subscription (
     following_id UUID,
-    follower_id  UUID,
+    follower_id  UUID
 );
