@@ -2,20 +2,23 @@
 TODO:
 [x] parent table 3/3
 [x] child table 4/1
-[x] many-to-many
+[x] many-to-many 2/1
 [x] constraints in another file
 */
 
 /* Parent 1 */
-DROP TABLE IF EXISTS file;
+DROP TABLE file;
 CREATE TABLE IF NOT EXISTS file (
-    id       UUID,
-    filetype VARCHAR(8),
-    fileurl  VARCHAR(256)
+    id            UUID,
+    url           VARCHAR(256),
+    filetype      VARCHAR(8),
+    filesize      BIGINT,
+    uploaded_by   UUID,
+    creation_date TIMESTAMP
     );
 
 /* Parent 2 */
-DROP TABLE IF EXISTS user_main;
+DROP TABLE user_main;
 CREATE TABLE IF NOT EXISTS user_main (
     id            UUID,
     username      VARCHAR(32),
@@ -27,28 +30,29 @@ CREATE TABLE IF NOT EXISTS user_main (
     gender        CHAR,
     birthday      DATE,
     creation_date TIMESTAMP,
-    pfp_id        UUID,
+    pfp_file_id   UUID,
     bio           VARCHAR(256)
     );
 
-/* Parent 3, Child 1 */
-DROP TABLE IF EXISTS user_post;
+/* Parent 3, Child 1, many to many */
+DROP TABLE user_post;
 CREATE TABLE IF NOT EXISTS user_post (
-    id            UUID,
-    user_id       UUID,
-    text          VARCHAR(1024),
-    creation_date TIMESTAMP
+    id             UUID,
+    user_id        UUID,
+    shared_post_id UUID,
+    text           VARCHAR(1024),
+    creation_date  TIMESTAMP
     );
 
 /* Child 2 */
-DROP TABLE IF EXISTS user_post_attachment;
+DROP TABLE user_post_attachment;
 CREATE TABLE IF NOT EXISTS user_post_attachment (
     post_id UUID,
     file_id UUID
     );
 
 /* Child 3 */
-DROP TABLE IF EXISTS user_post_comment;
+DROP TABLE user_post_comment;
 CREATE TABLE IF NOT EXISTS user_post_comment (
     id            UUID,
     commenter_id  UUID,
@@ -58,7 +62,7 @@ CREATE TABLE IF NOT EXISTS user_post_comment (
     );
 
 /* Child 4, Many to many */
-DROP TABLE IF EXISTS user_subscription;
+DROP TABLE user_subscription;
 CREATE TABLE IF NOT EXISTS user_subscription (
     following_id UUID,
     follower_id  UUID
