@@ -7,9 +7,9 @@ bash:
 
 .PHONY: db
 db:
-	cat ./create_tables.sql | docker exec -i lab_01-postgresql-db-1 psql -U postgres -d evilcorp
-	cat ./copy_tables.sql | docker exec -i lab_01-postgresql-db-1 psql -U postgres -d evilcorp
-	cat ./alter_tables.sql | docker exec -i lab_01-postgresql-db-1 psql -U postgres -d evilcorp
+	cat ./sql/create_tables.sql | docker exec -i lab_01-postgresql-db-1 psql -U postgres -d evilcorp
+	cat ./sql/copy_tables.sql | docker exec -i lab_01-postgresql-db-1 psql -U postgres -d evilcorp
+	cat ./sql/alter_tables.sql | docker exec -i lab_01-postgresql-db-1 psql -U postgres -d evilcorp
 
 .PHONY: restart
 restart:

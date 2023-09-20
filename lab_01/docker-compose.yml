@@ -6,6 +6,7 @@ services:
     volumes:
       - ./postgresql_data:/var/lib/postgresql/data
       - ./csv:/csv
+      - ./sql:/sql
     environment:
       TZ: "Europe/Moscow"
       POSTGRES_USER: postgres
