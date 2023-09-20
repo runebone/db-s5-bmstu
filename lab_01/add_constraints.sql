@@ -3,8 +3,14 @@ ALTER TABLE file
     ADD CONSTRAINT pk_file_main_id
     PRIMARY KEY (id),
 
+    ALTER COLUMN url SET NOT NULL,
     ALTER COLUMN filetype SET NOT NULL,
-    ALTER COLUMN fileurl SET NOT NULL;
+
+    ALTER COLUMN filesize SET NOT NULL,
+    ADD CONSTRAINT unsigned_file_filesize
+    CHECK (filesize > 0),
+
+    ALTER COLUMN creation_date SET NOT NULL;
 
 ALTER TABLE user_main
     ALTER COLUMN id SET NOT NULL,
@@ -17,10 +23,10 @@ ALTER TABLE user_main
     ADD CONSTRAINT check_user_main_username
     CHECK (
         LENGTH(username) BETWEEN 5 AND 32 AND 
-        username ~ '^[a-z0-9_]$' AND
-        username NOT LIKE '_%' AND
-        username NOT LIKE '%_' AND
-        username NOT LIKE '[0-9]%'
+        username ~ '^[a-z0-9_]+$' AND
+        username NOT LIKE '\_%' AND
+        username NOT LIKE '%\_' AND
+        username NOT LIKE '[0-9]+%'
     ),
 
     ALTER COLUMN fullname SET NOT NULL,
@@ -30,17 +36,27 @@ ALTER TABLE user_main
     CHECK (email LIKE '%@%.%'),
 
     ALTER COLUMN password_hash SET NOT NULL,
-    ALTER COLUMN phone SET NULL,
-    ALTER COLUMN country SET NULL,
-    ALTER COLUMN gender SET NULL,
+    ALTER COLUMN phone SET DEFAULT NULL,
+    ALTER COLUMN country SET DEFAULT NULL,
+    ALTER COLUMN gender SET DEFAULT NULL,
     ALTER COLUMN birthday SET NOT NULL,
     ALTER COLUMN creation_date SET NOT NULL,
 
-    ADD CONSTRAINT fk_user_main_pfp_id
-    FOREIGN KEY (pfp_id)
-    REFERENCES file(id),
+    ALTER COLUMN pfp_file_id SET DEFAULT NULL,
+    ADD CONSTRAINT fk_user_main_pfp_file_id
+    FOREIGN KEY (pfp_file_id)
+    REFERENCES file(id)
+    ON DELETE SET NULL,
 
-    ALTER COLUMN bio SET NULL;
+    ALTER COLUMN bio SET DEFAULT NULL;
+
+-- Table file again. To be able to add FK to user constraint.
+ALTER TABLE file
+    ALTER COLUMN uploaded_by SET DEFAULT NULL,
+    ADD CONSTRAINT fk_file_uploaded_by
+    FOREIGN KEY (uploaded_by)
+    REFERENCES user_main(id)
+    ON DELETE CASCADE;
 
 ALTER TABLE user_post
     ALTER COLUMN id SET NOT NULL,
@@ -52,6 +68,12 @@ ALTER TABLE user_post
     FOREIGN KEY (user_id)
     REFERENCES user_main(id)
     ON DELETE CASCADE,
+
+    ALTER COLUMN shared_post_id SET DEFAULT NULL,
+    ADD CONSTRAINT fk_user_post_shared_post_id
+    FOREIGN KEY (shared_post_id)
+    REFERENCES user_post(id)
+    ON DELETE SET NULL,
 
     ALTER COLUMN creation_date SET NOT NULL;
 
