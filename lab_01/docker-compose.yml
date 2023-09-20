@@ -5,6 +5,7 @@ services:
     image: postgres:alpine
     volumes:
       - ./postgresql_data:/var/lib/postgresql/data
+      - ./csv:/csv
     environment:
       TZ: "Europe/Moscow"
       POSTGRES_USER: postgres
