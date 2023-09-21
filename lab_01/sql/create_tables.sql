@@ -2,7 +2,7 @@
 TODO:
 [x] parent table 3/3
 [x] child table 4/1
-[x] many-to-many 2/1
+[x] many-to-many 1/1
 [x] constraints in another file
 */
 
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS user_main (
     bio           VARCHAR(256)
     );
 
-/* Parent 3, Child 1, many to many */
+/* Parent 3, Child 1 */
 DROP TABLE user_post;
 CREATE TABLE IF NOT EXISTS user_post (
     id             UUID,
