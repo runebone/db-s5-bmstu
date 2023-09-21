@@ -131,7 +131,8 @@ ALTER TABLE user_subscription
     REFERENCES user_main(id)
     ON DELETE CASCADE,
 
-    ALTER COLUMN should_notify SET NOT NULL DEFAULT TRUE,
+    ALTER COLUMN should_notify SET NOT NULL,
+    ALTER COLUMN should_notify SET DEFAULT TRUE,
     ALTER COLUMN creation_date SET NOT NULL,
 
     ADD CONSTRAINT unique_user_subscription
