@@ -78,6 +78,10 @@ ALTER TABLE user_post
     ALTER COLUMN creation_date SET NOT NULL;
 
 ALTER TABLE user_post_attachment
+    ALTER COLUMN id SET NOT NULL,
+    ADD CONSTRAINT pk_user_post_attachment_id
+    PRIMARY KEY (id),
+
     ALTER COLUMN post_id SET NOT NULL,
     ADD CONSTRAINT fk_user_post_attachment_post_id
     FOREIGN KEY (post_id)
@@ -88,10 +92,7 @@ ALTER TABLE user_post_attachment
     ADD CONSTRAINT fk_user_post_attachment_file_id
     FOREIGN KEY (file_id)
     REFERENCES file(id)
-    ON DELETE CASCADE,
-
-    ADD CONSTRAINT pk_user_post_attachment
-    PRIMARY KEY (post_id, file_id);
+    ON DELETE CASCADE;
 
 ALTER TABLE user_post_comment
     ALTER COLUMN id SET NOT NULL,
@@ -114,6 +115,10 @@ ALTER TABLE user_post_comment
     ALTER COLUMN creation_date SET NOT NULL;
 
 ALTER TABLE user_subscription
+    ALTER COLUMN id SET NOT NULL,
+    ADD CONSTRAINT pk_user_subscription_id
+    PRIMARY KEY (id),
+
     ALTER COLUMN following_id SET NOT NULL,
     ADD CONSTRAINT fk_user_subscription_following_id
     FOREIGN KEY (following_id)
@@ -126,5 +131,5 @@ ALTER TABLE user_subscription
     REFERENCES user_main(id)
     ON DELETE CASCADE,
 
-    ADD CONSTRAINT pk_user_subscription
-    PRIMARY KEY (following_id, follower_id);
+    ADD CONSTRAINT unique_user_subscription
+    UNIQUE (following_id, follower_id);

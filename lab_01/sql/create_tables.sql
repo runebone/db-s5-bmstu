@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS user_post (
 /* Child 2 */
 DROP TABLE user_post_attachment;
 CREATE TABLE IF NOT EXISTS user_post_attachment (
+    id      UUID,
     post_id UUID,
     file_id UUID
     );
@@ -64,6 +65,7 @@ CREATE TABLE IF NOT EXISTS user_post_comment (
 /* Child 4, Many to many */
 DROP TABLE user_subscription;
 CREATE TABLE IF NOT EXISTS user_subscription (
+    id           UUID,
     following_id UUID,
     follower_id  UUID
 );

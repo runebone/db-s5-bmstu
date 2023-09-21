@@ -40,12 +40,12 @@ create_csv_title(USER_MAIN_CSV, ["id", "username", "fullname", "email",
 create_csv_title(USER_POST_CSV, ["id", "user_id", "shared_post_id", "text",
                                  "creation_date"])
 
-create_csv_title(USER_POST_ATTACHMENT_CSV, ["post_id", "file_id"])
+create_csv_title(USER_POST_ATTACHMENT_CSV, ["id", "post_id", "file_id"])
 
 create_csv_title(USER_POST_COMMENT_CSV, ["id", "commenter_id", "post_id",
                                          "text", "creation_date"])
 
-create_csv_title(USER_SUBSCRIPTION_CSV, ["following_id", "follower_id"])
+create_csv_title(USER_SUBSCRIPTION_CSV, ["id", "following_id", "follower_id"])
 
 def write_to_csv(filename, data):
     with open(filename, 'a', newline='', encoding='utf-8') as file:
@@ -126,7 +126,8 @@ def create_post_attachments(n, post_ids, file_ids):
     unique_post_attachments = list(unique_post_attachments)
 
     for i in range(n):
-        write_to_csv(USER_POST_ATTACHMENT_CSV, [*unique_post_attachments[i]])
+        id = str(uuid.uuid4())
+        write_to_csv(USER_POST_ATTACHMENT_CSV, [id, *unique_post_attachments[i]])
 
 # Создаём 1000 вложений
 create_post_attachments(1000, post_ids, file_ids)
@@ -157,7 +158,8 @@ def create_subscriptions(n, user_ids):
     unique_subscriptions = list(unique_subscriptions)
 
     for i in range(n):
-        write_to_csv(USER_SUBSCRIPTION_CSV, [*unique_subscriptions[i]])
+        id = str(uuid.uuid4())
+        write_to_csv(USER_SUBSCRIPTION_CSV, [id, *unique_subscriptions[i]])
 
 # Создаём 1000 подписок
 create_subscriptions(1000, user_ids)
