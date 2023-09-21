@@ -65,7 +65,9 @@ CREATE TABLE IF NOT EXISTS user_post_comment (
 /* Child 4, Many to many */
 DROP TABLE user_subscription;
 CREATE TABLE IF NOT EXISTS user_subscription (
-    id           UUID,
-    following_id UUID,
-    follower_id  UUID
+    id            UUID,
+    following_id  UUID,
+    follower_id   UUID,
+    should_notify BOOL,
+    creation_date TIMESTAMP
 );

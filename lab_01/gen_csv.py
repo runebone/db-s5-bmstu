@@ -45,7 +45,8 @@ create_csv_title(USER_POST_ATTACHMENT_CSV, ["id", "post_id", "file_id"])
 create_csv_title(USER_POST_COMMENT_CSV, ["id", "commenter_id", "post_id",
                                          "text", "creation_date"])
 
-create_csv_title(USER_SUBSCRIPTION_CSV, ["id", "following_id", "follower_id"])
+create_csv_title(USER_SUBSCRIPTION_CSV, ["id", "following_id", "follower_id",
+                                         "should_notify", "creation_date"])
 
 def write_to_csv(filename, data):
     with open(filename, 'a', newline='', encoding='utf-8') as file:
@@ -159,7 +160,9 @@ def create_subscriptions(n, user_ids):
 
     for i in range(n):
         id = str(uuid.uuid4())
-        write_to_csv(USER_SUBSCRIPTION_CSV, [id, *unique_subscriptions[i]])
+        should_notify = fake.random_element([True, False])
+        creation_date = datetime.now()
+        write_to_csv(USER_SUBSCRIPTION_CSV, [id, *unique_subscriptions[i], should_notify, creation_date])
 
 # Создаём 1000 подписок
 create_subscriptions(1000, user_ids)
