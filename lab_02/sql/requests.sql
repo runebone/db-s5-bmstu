@@ -349,7 +349,7 @@ CREATE TEMPORARY TABLE IF NOT EXISTS manager (
 --
 CREATE TEMPORARY TABLE IF NOT EXISTS employee (
     id INT PRIMARY KEY,
-    manager_id INT REFERENCES manager(id),
+    manager_id INT REFERENCES manager(id) ON DELETE CASCADE,
     name TEXT NOT NULL
 );
 --
@@ -387,10 +387,88 @@ FROM RepkaIncorporated;
 
 /* 24. Оконные функции. Использование конструкция MIN/MAX/AVG/OVER() */
 /*/1* */
-/*TODO*/
+/* DROP TABLE IF EXISTS product; */
+CREATE TABLE IF NOT EXISTS product (
+    id         INT,
+    name       TEXT,
+    class      TEXT,
+    price      INT
+    );
+--
+/* DROP TABLE IF EXISTS order_details; */
+CREATE TABLE IF NOT EXISTS order_details (
+    id           INT,
+    product_id   INT,
+    wanted_price INT
+    );
+--
+INSERT INTO product VALUES (1, 'Orange', 'food', 10);
+INSERT INTO product VALUES (2, 'Apple', 'food', 10);
+INSERT INTO product VALUES (3, 'Cake', 'food', 100);
+INSERT INTO product VALUES (4, 'Skateboard', 'vehicle', 1000);
+INSERT INTO product VALUES (5, 'Subaru XV', 'vehicle', 1000000);
+INSERT INTO product VALUES (6, 'Black Hawk', 'vehicle', 1000000000);
+INSERT INTO product VALUES (7, 'Bird', 'animal', 0);
+--
+INSERT INTO order_details VALUES (1,  1, 0);
+INSERT INTO order_details VALUES (2,  1, 1);
+INSERT INTO order_details VALUES (3,  1, 6);
+INSERT INTO order_details VALUES (4,  1, 7);
+INSERT INTO order_details VALUES (5,  6, 0);
+INSERT INTO order_details VALUES (6,  6, 1000000);
+INSERT INTO order_details VALUES (7,  6, 5000000);
+INSERT INTO order_details VALUES (8,  6, 100500000);
+INSERT INTO order_details VALUES (9,  5, 0);
+INSERT INTO order_details VALUES (10, 5, 400000);
+INSERT INTO order_details VALUES (11, 5, 800000);
+INSERT INTO order_details VALUES (12, 3, 99);
+--
+SELECT p.id, p.price, p.name, od.wanted_price,
+    AVG(od.wanted_price) OVER(PARTITION BY p.id) AS AvgPrice,
+    MIN(od.wanted_price) OVER(PARTITION BY p.id) AS MinPrice,
+    MAX(od.wanted_price) OVER(PARTITION BY p.id) AS MaxPrice
+FROM product AS p
+LEFT OUTER JOIN order_details AS od
+ON od.product_id = p.id;
 /* */ */
 
 /* 25. Оконные функции для устранения дублей */
 /*/1* */
-/*TODO*/
+SELECT *, ROW_NUMBER() OVER(PARTITION BY class)
+FROM (
+    SELECT * FROM product
+    UNION ALL
+    SELECT * FROM product
+) AS foo;
 /* */ */
+
+/* Доп. задание на доп. баллы */
+CREATE TABLE IF NOT EXISTS table1 (
+    id              INT,
+    var1            TEXT,
+    valid_from_dttm DATE,
+    valid_to_dttm   DATE
+    );
+--
+CREATE TABLE IF NOT EXISTS table2 (
+    id              INT,
+    var2            TEXT,
+    valid_from_dttm DATE,
+    valid_to_dttm   DATE
+    );
+--
+INSERT INTO table1 VALUES (1, 'A', '2018-09-01', '2018-09-15');
+INSERT INTO table1 VALUES (1, 'B', '2018-09-16', '5999-12-31');
+--
+INSERT INTO table2 VALUES (1, 'A', '2018-09-01', '2018-09-18');
+INSERT INTO table2 VALUES (1, 'B', '2018-09-19', '5999-12-31');
+--
+SELECT t1.id, t1.var1, t2.var2,
+    GREATEST(t1.valid_from_dttm, t2.valid_from_dttm) AS merged_valid_from_dttm,
+    LEAST(t1.valid_to_dttm, t2.valid_to_dttm) AS merged_valid_to_dttm
+FROM table1 t1
+JOIN table2 t2
+ON t1.id = t2.id
+    AND t1.valid_from_dttm <= t2.valid_to_dttm
+    AND t1.valid_to_dttm >= t2.valid_from_dttm;
+/*XXX*/
