@@ -342,7 +342,47 @@ ORDER BY subscriber_count DESC, age DESC;
 
 /* 23. Инструкция SELECT, использующая рекурсивное обобщённое табличное выражение */
 /*/1* */
-/*TODO*/
+CREATE TEMPORARY TABLE IF NOT EXISTS manager (
+    id INT PRIMARY KEY,
+    name TEXT NOT NULL
+);
+--
+CREATE TEMPORARY TABLE IF NOT EXISTS employee (
+    id INT PRIMARY KEY,
+    manager_id INT REFERENCES manager(id),
+    name TEXT NOT NULL
+);
+--
+INSERT INTO manager VALUES (1, 'Репка');
+INSERT INTO manager VALUES (2, 'Дедка');
+INSERT INTO manager VALUES (3, 'Бабка');
+INSERT INTO manager VALUES (4, 'Внучка');
+INSERT INTO manager VALUES (5, 'Жучка');
+INSERT INTO manager VALUES (6, 'Кошка');
+INSERT INTO manager VALUES (7, 'Мышка');
+--
+INSERT INTO employee VALUES (1, NULL, 'Репка');
+INSERT INTO employee VALUES (2, 1, 'Дедка');
+INSERT INTO employee VALUES (3, 2, 'Бабка');
+INSERT INTO employee VALUES (4, 3, 'Внучка');
+INSERT INTO employee VALUES (5, 4, 'Жучка');
+INSERT INTO employee VALUES (6, 5, 'Кошка');
+INSERT INTO employee VALUES (7, 6, 'Мышка');
+--
+WITH RECURSIVE RepkaIncorporated (manager_id, employee_id, employee_name, lvl) AS (
+    SELECT e.manager_id, e.id, e.name, 0 AS lvl
+    FROM employee AS e
+    WHERE manager_id IS NULL
+    UNION ALL
+    --
+    SELECT e.manager_id, e.id, e.name, w.lvl + 1
+    FROM employee AS e
+    INNER JOIN RepkaIncorporated AS w
+    ON e.manager_id = w.employee_id
+)
+--
+SELECT manager_id, employee_id, employee_name, lvl
+FROM RepkaIncorporated;
 /* */ */
 
 /* 24. Оконные функции. Использование конструкция MIN/MAX/AVG/OVER() */
