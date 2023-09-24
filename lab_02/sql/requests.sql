@@ -55,8 +55,48 @@ WHERE EXISTS (
 /* */ */
 
 /* 6. Инструкция SELECT, использующая предикат сравнения с квантором */
+/* Получить пользователей, кто старше всех тех, у кого более 2х подписчиков */
 /*/1* */
-/*TODO*/
+WITH user_age AS (
+    SELECT id, EXTRACT(YEAR FROM NOW()) - EXTRACT(YEAR FROM birthday) AS age
+    FROM user_main
+),
+user_subscriber_count AS (
+    SELECT following_id AS id, COUNT(follower_id) AS subscriber_count
+    FROM user_subscription
+    GROUP BY following_id
+)
+SELECT username, age, subscriber_count
+FROM user_main AS t
+JOIN (SELECT * FROM user_age) AS tt ON tt.id = t.id
+JOIN (SELECT * FROM user_subscriber_count) AS ttt ON ttt.id = t.id
+WHERE age > ALL (
+    SELECT age
+    FROM user_age AS tttt
+    WHERE tttt.id = ANY (
+        SELECT id
+        FROM user_subscriber_count
+        WHERE subscriber_count > 2
+    )
+)
+
+/* Проверка (список пользователей, по убыванию возраста, у кого больше 2х подписчиков): */
+ORDER BY age DESC, subscriber_count DESC;
+WITH user_age AS (
+    SELECT id, EXTRACT(YEAR FROM NOW()) - EXTRACT(YEAR FROM birthday) AS age
+    FROM user_main
+),
+user_subscriber_count AS (
+    SELECT following_id AS id, COUNT(follower_id) AS subscriber_count
+    FROM user_subscription
+    GROUP BY following_id
+)
+SELECT username, age, subscriber_count
+FROM user_main AS t
+JOIN (SELECT * FROM user_age) AS tt ON tt.id = t.id
+JOIN (SELECT * FROM user_subscriber_count) AS ttt ON ttt.id = t.id
+WHERE subscriber_count > 2
+ORDER BY age DESC, subscriber_count DESC;
 /* */ */
 
 /* 7. Инструкция SELECT, использующая агрегатные функции в выражениях столбцов */
@@ -284,7 +324,20 @@ DELETE FROM user_main WHERE id = (SELECT id FROM user_main LIMIT 1);
 
 /* 22. Инструкция SELECT, использующая простое обобщённое табличное выражение */
 /*/1* */
-/*TODO*/
+WITH user_age AS (
+    SELECT id, EXTRACT(YEAR FROM NOW()) - EXTRACT(YEAR FROM birthday) AS age
+    FROM user_main
+),
+user_subscriber_count AS (
+    SELECT following_id AS id, COUNT(follower_id) AS subscriber_count
+    FROM user_subscription
+    GROUP BY following_id
+)
+SELECT username, age, subscriber_count
+FROM user_main AS t
+JOIN (SELECT * FROM user_age) AS tt ON tt.id = t.id
+JOIN (SELECT * FROM user_subscriber_count) AS ttt ON ttt.id = t.id
+ORDER BY subscriber_count DESC, age DESC;
 /* */ */
 
 /* 23. Инструкция SELECT, использующая рекурсивное обобщённое табличное выражение */
