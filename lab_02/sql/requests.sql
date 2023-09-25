@@ -443,6 +443,7 @@ FROM (
 /* */ */
 
 /* Доп. задание на доп. баллы */
+DROP TABLE IF EXISTS table1;
 CREATE TABLE IF NOT EXISTS table1 (
     id              INT,
     var1            TEXT,
@@ -450,6 +451,7 @@ CREATE TABLE IF NOT EXISTS table1 (
     valid_to_dttm   DATE
     );
 --
+DROP TABLE IF EXISTS table2;
 CREATE TABLE IF NOT EXISTS table2 (
     id              INT,
     var2            TEXT,
@@ -464,11 +466,65 @@ INSERT INTO table2 VALUES (1, 'A', '2018-09-01', '2018-09-18');
 INSERT INTO table2 VALUES (1, 'B', '2018-09-19', '5999-12-31');
 --
 SELECT t1.id, t1.var1, t2.var2,
-    GREATEST(t1.valid_from_dttm, t2.valid_from_dttm) AS merged_valid_from_dttm,
-    LEAST(t1.valid_to_dttm, t2.valid_to_dttm) AS merged_valid_to_dttm
+    GREATEST(t1.valid_from_dttm, t2.valid_from_dttm) AS greatest_from,
+    LEAST(t1.valid_to_dttm, t2.valid_to_dttm) AS least_to
 FROM table1 t1
 JOIN table2 t2
 ON t1.id = t2.id
     AND t1.valid_from_dttm <= t2.valid_to_dttm
-    AND t1.valid_to_dttm >= t2.valid_from_dttm;
-/*XXX*/
+    AND t2.valid_from_dttm <= t1.valid_to_dttm;
+
+-- Для себя
+DROP TABLE IF EXISTS t1;
+CREATE TABLE IF NOT EXISTS t1 (
+    id    INT,
+    v1    CHAR,
+    vfrom INT,
+    vto   INT
+    );
+--
+DROP TABLE IF EXISTS t2;
+CREATE TABLE IF NOT EXISTS t2 (
+    id    INT,
+    v2    CHAR,
+    vfrom INT,
+    vto   INT
+    );
+--
+DROP TABLE IF EXISTS t3;
+CREATE TABLE IF NOT EXISTS t3 (
+    id    INT,
+    v3    CHAR,
+    vfrom INT,
+    vto   INT
+    );
+--
+INSERT INTO t1 VALUES (1, 'A', 0, 33);
+INSERT INTO t1 VALUES (1, 'B', 34, 66);
+INSERT INTO t1 VALUES (1, 'C', 67, 100);
+--
+INSERT INTO t2 VALUES (1, 'A', 0, 20);
+INSERT INTO t2 VALUES (1, 'B', 21, 47);
+INSERT INTO t2 VALUES (1, 'C', 48, 100);
+--
+INSERT INTO t3 VALUES (1, 'A', 0, 40);
+INSERT INTO t3 VALUES (1, 'B', 41, 87);
+INSERT INTO t3 VALUES (1, 'C', 88, 100);
+--
+SELECT t12.id, t12.v1, t12.v2, t3.v3,
+    GREATEST(gfrom, t3.vfrom) AS greatest_from,
+    LEAST(lto, t3.vto) AS least_to
+FROM (
+    SELECT t1.id, t1.v1, t2.v2,
+        GREATEST(t1.vfrom, t2.vfrom) AS gfrom,
+        LEAST(t1.vto, t2.vto) AS lto
+    FROM t1
+    JOIN t2
+    ON t1.id = t2.id
+        AND t1.vfrom <= t2.vto
+        AND t2.vfrom <= t1.vto
+) AS t12
+JOIN t3
+ON t12.id = t3.id
+    AND t12.gfrom <= t3.vto
+    AND t3.vfrom <= t12.lto;
