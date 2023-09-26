@@ -528,3 +528,45 @@ JOIN t3
 ON t12.id = t3.id
     AND t12.gfrom <= t3.vto
     AND t3.vfrom <= t12.lto;
+
+--
+-- Защита:
+INSERT INTO user_post
+(id, user_id, shared_post_id, text, creation_date)
+VALUES
+(
+    uuid_generate_v4(),
+    (SELECT id FROM user_main LIMIT 1),
+    NULL,
+    'test text',
+    '2022-09-20 21:45:01.260562'
+);
+
+INSERT INTO user_post_attachment
+VALUES
+(
+    '5eb66d86-c33b-4382-9b4f-74b2e82fa468',
+    (SELECT id FROM file LIMIT 1)
+);
+
+WITH table_all AS (
+    SELECT *
+    FROM user_main AS um
+    JOIN (
+        SELECT id, user_id, creation_date AS post_cd
+        FROM user_post
+    ) AS up
+    ON up.user_id = um.id
+    JOIN user_post_attachment AS upa
+    ON upa.post_id = up.id
+)
+SELECT
+    username,
+    fullname,
+    email,
+    creation_date,
+    post_cd,
+    file_id
+FROM table_all
+WHERE EXTRACT(YEAR FROM post_cd) = 2022
+ORDER BY post_cd DESC;
