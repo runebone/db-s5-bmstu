@@ -189,10 +189,49 @@ $$ LANGUAGE plpgsql;
 
 -- 7. Хранимую процедуру с курсором
 {
+CREATE OR REPLACE PROCEDURE fn_list_users()
+AS $$
+    DECLARE
+        rec user_main%ROWTYPE;
+        cur CURSOR FOR (
+            SELECT *
+            FROM user_main
+        );
+    BEGIN
+        OPEN cur;
+
+        LOOP
+            FETCH NEXT FROM cur INTO rec;
+
+            EXIT WHEN NOT FOUND;
+
+            RAISE NOTICE 'Username: %', rec.username;
+        END LOOP;
+
+        CLOSE cur;
+    END;
+$$ LANGUAGE plpgsql;
 }
 
 -- 8. Хранимую процедуру доступа к метаданным
 {
+DROP PROCEDURE fn_get_db_meta(dbname text);
+
+CREATE OR REPLACE PROCEDURE fn_get_db_meta(dbname text)
+AS $$
+    DECLARE
+        dbid INT;
+    BEGIN
+        SELECT pg_database.oid
+        FROM pg_database
+        WHERE pg_database.datname = dbname
+        INTO dbid;
+        
+        RAISE NOTICE 'DB: %, ID: %', dbname, dbid;
+    END;
+$$ LANGUAGE plpgsql;
+
+CALL fn_get_db_meta('evilcorp');
 }
 
 -- 9. DML-Триггер AFTER
