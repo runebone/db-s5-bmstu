@@ -236,10 +236,59 @@ CALL fn_get_db_meta('evilcorp');
 
 -- 9. DML-Триггер AFTER
 {
+CREATE OR REPLACE FUNCTION fn_echo_insert()
+RETURNS TRIGGER
+AS $$
+    BEGIN
+        RAISE NOTICE 'INSERTED new record;';
+        RETURN new;
+    END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER tg_echo_insert
+    AFTER INSERT ON user_main
+EXECUTE PROCEDURE fn_echo_insert();
+
+INSERT INTO user_main(
+    id,
+    username,
+    fullname,
+    email,
+    password_hash,
+    birthday,
+    creation_date
+)
+VALUES
+(
+    uuid_generate_v4(),
+    'useasdfrasdfnamellkjlkjsakdjf',
+    'Default Human',
+    'default@example.net',
+    'defaultpasswordhash',
+    '1901-01-01',
+    NOW()
+);
 }
 
 -- 10. DML-Триггер INSTEAD OF
 {
+CREATE OR REPLACE FUNCTION fn_you_shall_not_pass()
+RETURNS TRIGGER
+AS $$
+    BEGIN
+        RAISE NOTICE 'YOU SHALL NOT PASS %;', old;
+        RETURN old;
+    END;
+$$ LANGUAGE plpgsql;
+
+CREATE VIEW file_copy AS
+SELECT * FROM file;
+
+CREATE OR REPLACE TRIGGER tg_you_shall_not_pass
+    INSTEAD OF DELETE
+    ON file_copy
+    FOR EACH ROW
+EXECUTE PROCEDURE fn_you_shall_not_pass();
 }
 
 -- Test recursive
@@ -267,4 +316,63 @@ CALL fn_get_db_meta('evilcorp');
     )
 
     SELECT * FROM sub_tree;
+}
+
+-- Защита
+{
+-- фя по ид пользователя
+-- опр. стат сделанных постов в опр даты с какого то по какое-то
+-- указывать комменты если есть
+-- были ли прикреплены файлы
+-- если да то инфу о файлах
+DROP FUNCTION IF EXISTS fn_get_stats(UUID, TIMESTAMP WITH TIME ZONE, TIMESTAMP WITH TIME ZONE);
+CREATE OR REPLACE FUNCTION fn_get_stats(
+    x_id  UUID,
+    since TIMESTAMP WITH TIME ZONE,
+    until TIMESTAMP WITH TIME ZONE
+)
+RETURNS TABLE
+    (
+        post_id UUID,
+        creation_date TIMESTAMP WITH TIME ZONE,
+        attachment_file UUID,
+        file_url VARCHAR(256),
+        commenter VARCHAR(32),
+        comment_text TEXT
+    )
+AS $$
+    SELECT
+        up.id AS post_id,
+        up.creation_date AS creation_date,
+        upa.file_id AS attachment_file,
+        f.url AS file_url,
+        um.username AS commenter,
+        uc.text AS comment_text
+    FROM user_post AS up
+    LEFT OUTER JOIN user_post_comment AS uc
+    ON up.id = uc.post_id
+    LEFT OUTER JOIN user_main AS um
+    ON uc.commenter_id = um.id
+    LEFT OUTER JOIN user_post_attachment AS upa
+    ON up.id = upa.post_id
+    LEFT OUTER JOIN file AS f
+    ON upa.file_id = f.id
+    WHERE up.user_id = x_id
+    AND up.creation_date >= since
+    AND up.creation_date <= until;
+$$ LANGUAGE SQL;
+
+SELECT * FROM fn_get_stats(
+    -- '84bfd7b2-5ceb-4e53-9bc3-78e053d63f1d'::UUID,
+    'f8ae45fa-6439-4d81-8ccf-9deacbe16b16'::UUID,
+    '1990-11-07 00:00:00.000000+03'::TIMESTAMP,
+    NOW()
+);
+
+SELECT * FROM fn_get_stats(
+    '84bfd7b2-5ceb-4e53-9bc3-78e053d63f1d'::UUID,
+    -- 'f8ae45fa-6439-4d81-8ccf-9deacbe16b16'::UUID,
+    '1990-11-07 00:00:00.000000+03'::TIMESTAMP,
+    NOW()
+);
 }
