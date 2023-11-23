@@ -141,3 +141,68 @@ AS $$
 $$ LANGUAGE plpython3u;
 --
 SELECT * FROM pyfn_get_user_followers_count2('bianca796182'::VARCHAR(32));
+
+-- Защита
+
+DROP FUNCTION IF EXISTS pyfn_get_stats(UUID, TIMESTAMP WITH TIME ZONE, TIMESTAMP WITH TIME ZONE);
+CREATE OR REPLACE FUNCTION pyfn_get_stats(
+    x_id  UUID,
+    since TIMESTAMP WITH TIME ZONE,
+    until TIMESTAMP WITH TIME ZONE
+)
+RETURNS TABLE
+    (
+        post_id UUID,
+        creation_date TIMESTAMP WITH TIME ZONE,
+        attachment_file UUID,
+        file_url VARCHAR(256),
+        commenter VARCHAR(32),
+        comment_text TEXT
+    )
+AS $$
+    query = plpy.prepare("""
+    SELECT
+        up.id AS post_id,
+        up.creation_date AS creation_date,
+        upa.file_id AS attachment_file,
+        f.url AS file_url,
+        um.username AS commenter,
+        uc.text AS comment_text
+    FROM user_post AS up
+    LEFT OUTER JOIN user_post_comment AS uc
+    ON up.id = uc.post_id
+    LEFT OUTER JOIN user_main AS um
+    ON uc.commenter_id = um.id
+    LEFT OUTER JOIN user_post_attachment AS upa
+    ON up.id = upa.post_id
+    LEFT OUTER JOIN file AS f
+    ON upa.file_id = f.id
+    WHERE up.user_id = $1
+    AND up.creation_date >= $2
+    AND up.creation_date <= $3
+    """, ["UUID", "TIMESTAMP WITH TIMEZONE", "TIMESTAMP WITH TIMEZONE"])
+    result = plpy.execute(query, [x_id, since, until])
+    if result:
+        return (
+            result[0]["post_id"],
+            result[0]["creation_date"],
+            result[0]["attachment_file"],
+            result[0]["file_url"],
+            result[0]["commenter"],
+            result[0]["comment_text"]
+        )
+$$ LANGUAGE plpython3u;
+--
+SELECT * FROM fn_get_stats(
+    -- '84bfd7b2-5ceb-4e53-9bc3-78e053d63f1d'::UUID,
+    'f8ae45fa-6439-4d81-8ccf-9deacbe16b16'::UUID,
+    '1990-11-07 00:00:00.000000+03'::TIMESTAMP,
+    NOW()
+);
+--
+SELECT * FROM fn_get_stats(
+    '84bfd7b2-5ceb-4e53-9bc3-78e053d63f1d'::UUID,
+    -- 'f8ae45fa-6439-4d81-8ccf-9deacbe16b16'::UUID,
+    '1990-11-07 00:00:00.000000+03'::TIMESTAMP,
+    NOW()
+);
