@@ -9,6 +9,7 @@ docker exec -it *имя контейнера* bash
 ```
 psql --version
 ```
+(у меня выдало `psql (PostgreSQL) 15.3`)
 
 3. Если в контейнере у вас стоит `Linux Alpine`
 ```
