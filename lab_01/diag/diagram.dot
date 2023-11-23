@@ -1,0 +1,68 @@
+digraph ERDiagram {
+    node [shape=record, fontname="Mononoki"];
+
+    File [label="{File|
+    + id              : UUID
+    \l+ url           : VARCHAR(256)
+    \l+ filetype      : VARCHAR(8)
+    \l+ filesize      : BIGINT
+    \l+ uploaded_by   : UUID
+    \l+ creation_date : TIMESTAMP
+    \l}"];
+
+    User [label="{User|
+    + id              : UUID
+    \l+ username      : VARCHAR(32)
+    \l+ fullname      : VARCHAR(256)
+    \l+ email         : VARCHAR(64)
+    \l+ password_hash : VARCHAR(256)
+    \l+ phone         : VARCHAR(256)
+    \l+ country       : VARCHAR(256)
+    \l+ gender        : CHAR
+    \l+ birthday      : DATE
+    \l+ creation_date : TIMESTAMP
+    \l+ pfp_file_id   : UUID
+    \l+ bio           : VARCHAR(256)
+    \l}"];
+
+    Post [label="{Post|
+    + id               : UUID
+    \l+ user_id        : UUID
+    \l+ shared_post_id : UUID
+    \l+ text           : VARCHAR(1024)
+    \l+ creation_date  : TIMESTAMP
+    \l}"];
+
+    PostAttachment [label="{PostAttachment|
+    + id        : UUID
+    \l+ post_id : UUID
+    \l+ file_id : UUID
+    \l}"];
+
+    PostComment [label="{PostComment|
+    + id              : UUID
+    \l+ commenter_id  : UUID
+    \l+ post_id       : UUID
+    \l+ text          : VARCHAR(1024)
+    \l+ creation_date : TIMESTAMP
+    \l}"];
+
+    Subscription [label="{Subscription|
+    + id              : UUID
+    \l+ following_id  : UUID
+    \l+ follower_id   : UUID
+    \l+ should_notify : BOOL
+    \l+ creation_date : TIMESTAMP
+    \l}"];
+
+    // Relations
+    User -> File [label=" pfp_file_id"];
+    Post -> User [label=" user_id"];
+    Post -> Post [label=" shared_post_id"];
+    PostAttachment -> Post [label=" post_id"];
+    PostAttachment -> File [label=" file_id"];
+    PostComment -> User [label=" commenter_id"];
+    PostComment -> Post [label=" post_id"];
+    Subscription -> User [label=" following_id"];
+    Subscription -> User [label=" follower_id"];
+}
