@@ -6,6 +6,17 @@ TODO:
 [x] constraints in another file
 */
 
+CREATE TABLE IF NOT EXISTS s (
+    id INT,
+    name VARCHAR(32),
+    pid INT
+    );
+
+CREATE TABLE IF NOT EXISTS p (
+    pid INT,
+    name VARCHAR(32)
+    );
+
 /* Parent 1 */
 DROP TABLE file;
 CREATE TABLE IF NOT EXISTS file (
