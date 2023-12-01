@@ -1,0 +1,7 @@
+CompileFlags:
+    Add:
+    - -I/nix/var/nix/profiles/per-user/human/profile/include
+    - -I/nix/store/4g26kjad3bg7fwl7xlhd0n27d1v8adhh-libpqxx-7.7.0/include
+    - -I/nix/store/4g26kjad3bg7fwl7xlhd0n27d1v8adhh-libpqxx-7.7.0/include/pqxx
+    - -L/nix/store/4g26kjad3bg7fwl7xlhd0n27d1v8adhh-libpqxx-7.7.0/lib
+    - -lpqxx
