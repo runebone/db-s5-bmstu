@@ -1,6 +1,7 @@
 #include <iostream>
 #include <pqxx/pqxx>
 
+#define TCR "\033[31m"
 #define TCB "\033[34m"
 #define RC "\033[0;0;0m"
 
@@ -165,6 +166,41 @@ SELECT * FROM post_likes_reposts; \
     return w.exec(request);
 }
 
+pqxx::result protection(pqxx::work& w) {
+    /*
+        По айдишнику пользователя выводить:
+        - Ник
+        - Имя
+        - Страну
+        - Имейл
+        - Количество подписчиков
+        - Количество постов
+    */
+    std::string request = " \
+CREATE OR REPLACE FUNCTION fn_get_user_stats(x_uuid UUID) \
+RETURNS TABLE ( \
+    username TEXT, \
+    fullname TEXT, \
+    country TEXT, \
+    email TEXT, \
+    count_subs INT, \
+    count_posts INT \
+) AS $$ \
+    SELECT username, fullname, country, email, COUNT(follower_id) count_subs, COUNT(up.id) count_posts \
+    FROM user_main um \
+    LEFT OUTER JOIN user_subscription us \
+    ON us.following_id = um.id \
+    LEFT OUTER JOIN user_post up \
+    ON up.user_id = um.id \
+    WHERE um.id = x_uuid \
+    GROUP BY username, fullname, country, email \
+$$ LANGUAGE SQL; \
+SELECT * FROM fn_get_user_stats('b1b058c3-f18b-437b-8da2-7b3b3ed6aa3e'); \
+";
+
+    return w.exec(request);
+}
+
 void printResult(const pqxx::result& result) {
     for (const auto& row : result) {
         std::cout << "| ";
@@ -205,11 +241,12 @@ int main() {
             printf("[ 9] Создать таблицу\n");
             printf("[10] Вставить данные в созданную таблицу\n");
             printf("[11] Вывести созданную таблицу\n");
+            printf("[12] Вывести информацию о пользователе\n");
             printf("[ 0] Выйти\n");
             printf(">>> ");
 
             if (scanf("%d", &c) != 1) {
-                printf("aoaoa.\n");
+                printf(TCR "Error\n" RC);
                 fgets(buf, sizeof(buf), stdin); // Flushing input
                 continue;
             }
@@ -249,7 +286,11 @@ int main() {
                 case 11:
                     printResult(selectDataFromCreatedTable(w));
                     break;
+                case 12:
+                    printResult(protection(w));
+                    break;
                 default:
+                    printf(TCR "IndexError\n" RC);
                     break;
             }
             printf(RC);
