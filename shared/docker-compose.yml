@@ -7,6 +7,7 @@ services:
       - ./postgresql_data:/var/lib/postgresql/data
       - ./csv:/csv
       - ./sql:/sql
+      - ./json:/json
     environment:
       TZ: "Europe/Moscow"
       POSTGRES_USER: postgres
